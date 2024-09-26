@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
+
 import { Calendar, globalizeLocalizer } from "react-big-calendar";
 import globalize from "globalize";
 import "react-big-calendar/lib/css/react-big-calendar.css";
@@ -10,6 +11,7 @@ export default function Datepicker() {
   const [events, setEvents] = useState([]);
   const [newEvent, setNewEvent] = useState({
     person: "",
+    second: "",
     title: "",
     start: new Date(),
     end: new Date(),
@@ -39,6 +41,7 @@ export default function Datepicker() {
 
     const eventToAdd = {
       person: newEvent.person,
+      second: newEvent.second,
       title: newEvent.title,
       start: new Date(newEvent.start),
       end: new Date(newEvent.end),
@@ -65,6 +68,7 @@ export default function Datepicker() {
         ]);
         setNewEvent({
           person: "",
+          second: "",
           title: "",
           start: new Date(),
           end: new Date(),
@@ -76,6 +80,28 @@ export default function Datepicker() {
       console.error("Error:", error);
     }
   };
+
+  const eventStyleGetter = (event) => {
+    return {
+      style: {
+        backgroundColor: "#3174ad",
+        color: "white",
+      },
+    };
+  };
+
+  const EventComponent = ({ event }) => (
+    <span>
+      <strong>{event.title}</strong> <br />
+      <em>{event.person}</em> <br />
+      {event.start.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      })}{" "}
+      -
+      {event.end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+    </span>
+  );
 
   return (
     <div className="p-4">
@@ -89,6 +115,10 @@ export default function Datepicker() {
           endAccessor="end"
           style={{ height: 500 }}
           popup={true}
+          components={{
+            event: EventComponent,
+          }}
+          eventPropGetter={eventStyleGetter}
         />
       </div>
 
