@@ -10,11 +10,15 @@ const informationSchema = new Schema({
     required: true,
   },
   start: {
-    type: String,
+    type: Date, // Changed to Date
     required: true,
   },
   end: {
-    type: String,
+    type: Date, // Changed to Date
+    required: true,
+  },
+  second: {
+    type: String, // Ensure this field exists
     required: true,
   },
 });

@@ -1,6 +1,5 @@
 "use client";
 import React, { useEffect, useState } from "react";
-
 import { Calendar, globalizeLocalizer } from "react-big-calendar";
 import globalize from "globalize";
 import "react-big-calendar/lib/css/react-big-calendar.css";
@@ -22,6 +21,7 @@ export default function Datepicker() {
       try {
         const res = await fetch("/api/events");
         const data = await res.json();
+        console.log("Fetched events:", data); // Log fetched events
         setEvents(
           data.map((event) => ({
             ...event,
@@ -41,11 +41,13 @@ export default function Datepicker() {
 
     const eventToAdd = {
       person: newEvent.person,
-      second: newEvent.second,
+      second: newEvent.second, // Ensure this is being passed
       title: newEvent.title,
-      start: new Date(newEvent.start),
-      end: new Date(newEvent.end),
+      start: new Date(newEvent.start), // Ensure valid date format
+      end: new Date(newEvent.end), // Ensure valid date format
     };
+
+    console.log("Adding event:", eventToAdd); // Log new event to be added
 
     try {
       const res = await fetch("/api/events", {
@@ -58,6 +60,7 @@ export default function Datepicker() {
 
       if (res.ok) {
         const addedEvent = await res.json();
+        console.log("Added event:", addedEvent); // Log added event
         setEvents([
           ...events,
           {
@@ -81,27 +84,41 @@ export default function Datepicker() {
     }
   };
 
-  const eventStyleGetter = (event) => {
-    return {
-      style: {
-        backgroundColor: "#3174ad",
-        color: "white",
-      },
-    };
-  };
+  // Styling events in the calendar
+  // const eventStyleGetter = (event) => {
+  //   return {
+  //     style: {
+  //       backgroundColor: "#3174ad",
+  //       color: "white",
+  //     },
+  //   };
+  // };
 
-  const EventComponent = ({ event }) => (
-    <span>
-      <strong>{event.title}</strong> <br />
-      <em>{event.person}</em> <br />
-      {event.start.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      })}{" "}
-      -
-      {event.end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-    </span>
-  );
+  // Custom component to render events in the calendar
+  const EventComponent = ({ event }) => {
+    console.log("Event data:", event); // Log the event to check all fields
+
+    return (
+      <span>
+        <strong>{event.title}</strong> <br />
+        <em>{event.person || "No person"}</em> <br />
+        <em>{event.second || "No second person"}</em> <br />
+        {event.start && event.end && (
+          <>
+            {event.start.toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}{" "}
+            -{" "}
+            {event.end.toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          </>
+        )}
+      </span>
+    );
+  };
 
   return (
     <div className="p-4">
@@ -115,63 +132,54 @@ export default function Datepicker() {
           endAccessor="end"
           style={{ height: 500 }}
           popup={true}
-          components={{
-            event: EventComponent,
-          }}
-          eventPropGetter={eventStyleGetter}
+          // components={{
+          //   event: EventComponent,
+          // }}
+          // eventPropGetter={eventStyleGetter}
         />
       </div>
 
-      <form onSubmit={handleAddEvent} className="mb-4">
-        <div className="mb-2">
-          <label>Person:</label>
-          <input
-            type="text"
-            value={newEvent.person}
-            onChange={(e) =>
-              setNewEvent({ ...newEvent, person: e.target.value })
-            }
-            className="border p-2"
-            required
-          />
-        </div>
-        <div className="mb-2">
-          <label>Title:</label>
-          <input
-            type="text"
-            value={newEvent.title}
-            onChange={(e) =>
-              setNewEvent({ ...newEvent, title: e.target.value })
-            }
-            className="border p-2"
-            required
-          />
-        </div>
-        <div className="mb-2">
-          <label>Start Date:</label>
-          <input
-            type="datetime-local"
-            value={new Date(newEvent.start).toISOString().slice(0, 16)}
-            onChange={(e) =>
-              setNewEvent({ ...newEvent, start: e.target.value })
-            }
-            className="border p-2"
-            required
-          />
-        </div>
-        <div className="mb-2">
-          <label>End Date:</label>
-          <input
-            type="datetime-local"
-            value={new Date(newEvent.end).toISOString().slice(0, 16)}
-            onChange={(e) => setNewEvent({ ...newEvent, end: e.target.value })}
-            className="border p-2"
-            required
-          />
-        </div>
-        <button type="submit" className="bg-blue-500 text-white p-2">
-          Add Event
-        </button>
+      <form onSubmit={handleAddEvent}>
+        <label>Person:</label>
+        <input
+          type="text"
+          value={newEvent.person}
+          onChange={(e) => setNewEvent({ ...newEvent, person: e.target.value })}
+          required
+        />
+
+        <label>Second:</label>
+        <input
+          type="text"
+          value={newEvent.second}
+          onChange={(e) => setNewEvent({ ...newEvent, second: e.target.value })}
+          required
+        />
+        <label>title:</label>
+        <input
+          type="text"
+          value={newEvent.title}
+          onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
+          required
+        />
+
+        <label>Start Date:</label>
+        <input
+          type="datetime-local"
+          value={new Date(newEvent.start).toISOString().slice(0, 16)}
+          onChange={(e) => setNewEvent({ ...newEvent, start: e.target.value })}
+          required
+        />
+
+        <label>End Date:</label>
+        <input
+          type="datetime-local"
+          value={new Date(newEvent.end).toISOString().slice(0, 16)}
+          onChange={(e) => setNewEvent({ ...newEvent, end: e.target.value })}
+          required
+        />
+
+        <button type="submit">Add Event</button>
       </form>
     </div>
   );
